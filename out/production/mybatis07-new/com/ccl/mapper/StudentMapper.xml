@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+
+    namespace:命名空间
+              不同的mapper映射文件使用namespace来做区分
+              不同的mapper映射文件所使用的namespace的命名不允许出现重复
+
+    使用命名空间.sqlId的形式来找到我们想要执行的sql语句
+
+     test1.getById1
+
+-->
+<mapper namespace="test1">
+
+    <!--
+
+        sql语句必须要写在相应的标签当中
+        <insert>:在标签对中写insert开头的sql语句 处理添加操作
+        <update>:在标签对中写update开头的sql语句 处理修改操作
+        <delete>:在标签对中写delete开头的sql语句 处理删除操作
+        <select>:在标签对中写select开头的sql语句 处理查询操作
+
+        parameterType:为sql语句传递的参数的类型
+
+    -->
+
+    <select id="getById" parameterType="java.lang.String" resultType="com.ccl.domain.Student">
+
+        select * from student where id=#{id}
+
+    </select>
+
+    <select id="getAll" resultType="com.ccl.domain.Student">
+        select * from student
+    </select>
+
+    <insert id="save">
+        insert into student values (#{id},#{name},#{email},#{age})
+    </insert>
+
+    <update id="update">
+        update student set name = #{name},email=#{email},age=#{age} where id = #{id}
+    </update>
+
+    <delete id="delete">
+         delete from student where id=#{id}
+
+    </delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

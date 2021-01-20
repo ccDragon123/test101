@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccl.dao.BeautyMapper">
+
+<!--    嵌套查询-->
+    <select id="getBeauty" resultMap="BeautyCP">
+       select * from beauty
+    </select>
+<!-- 结果集映射-->
+<!--property是javaBean类的属性名，  column是数据库中的字段名  -->
+    <resultMap id="BeautyCP" type="Beauty">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="sex" column="sex"/>
+        <result property="bornDate" column="bornDate"/>
+        <result property="phone" column="phone"/>
+<!--        复杂属性单独处理-->
+        <association property="boys" column="boyfriend_id" javaType="Boys" select="getBoys"/>
+    </resultMap>
+
+    <select id="getBoys" resultType="Boys">
+      select * from boys where id = #{id}
+    </select>
+
+</mapper>

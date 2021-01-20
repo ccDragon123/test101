@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+
+    namespace:命名空间
+              不同的mapper映射文件使用namespace来做区分
+              不同的mapper映射文件所使用的namespace的命名不允许出现重复
+
+    使用命名空间.sqlId的形式来找到我们想要执行的sql语句
+
+     test1.getById1
+
+-->
+<mapper namespace="com.ccl.dao.StudentDao">
+
+
+    <!--
+
+        sql语句必须要写在相应的标签当中
+        <insert>:在标签对中写insert开头的sql语句 处理添加操作
+        <update>:在标签对中写update开头的sql语句 处理修改操作
+        <delete>:在标签对中写delete开头的sql语句 处理删除操作
+        <select>:在标签对中写select开头的sql语句 处理查询操作
+
+        parameterType:为sql语句传递的参数的类型
+
+    -->
+
+    <select id="getById"  resultType="com.ccl.domain.Student">
+
+        select * from student where id=#{id}
+
+    </select>
+
+    <insert id="save">
+        insert into student values (#{id},#{name},#{email},#{age})
+    </insert>
+
+    <select id="getAll" resultType="com.ccl.domain.Student">
+        select * from student
+    </select>
+
+  <select id="select2" parameterType="student" resultType="student">
+      select * from student where name = #{name} and age = #{age}
+  </select>
+
+<!--
+如果我们为sql语句传递参数类型为一个map类型
+那么#{}中的标识符必须map的key
+-->
+    <select id="select3" parameterType="map" resultType="student">
+        select * from student where name = #{name} and age = #{age}
+    </select>
+
+
+    <select id="select4" resultType="student">
+        select * from student where name like '${value}%'
+    </select>
+
+    <select id="select5" resultType="student">
+        select * from student where name like #{name}
+    </select>
+
+    <!--在mysql中 空格 相当于java中+ ，起拼接字符串的作用-->
+    <select id="select6" resultType="student">
+        select * from student where name like '%' #{name} '%'
+    </select>
+
+    <select id="select7" parameterType="int" resultType="String">
+        select name from student where age = #{age}
+    </select>
+
+    <select id="select8"  resultType="String">
+        select name from student
+    </select>
+
+    <select id="select9" resultType="int">
+        select count(*) from student
+    </select>
+
+    <select id="select10" resultType="student">
+        select * from student where name = #{name}
+    </select>
+
+    <select id="select11" resultType="map">
+        select * from student
+    </select>
+
+    <!--
+    当domain种属性名和数据库种的字段名不一致时如何决解？
+    resultMap标签使用来domain种属性名和数据库种的字段名进行匹配的一种标签
+    -->
+    <resultMap id="stu" type="Student">
+        <!--
+        id标签： 用来匹配主键的对应关系
+        result： 用来匹配普通字段的对应关系
+        因此resultMap存在一个id 多个result
+
+        property对应domain中的属性名
+        column对应数据库中的字段名
+
+        -->
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="email" column="email"/>
+        <result property="age" column="age"/>
+    </resultMap>
+
+<!--    相当于sql语句起别名 select id as id,name as name ,email as email,age as age from student-->
+    <select id="select12" resultMap="stu">
+        select id,name as name ,email,age from student
+    </select>
+
+<!--
+where 标签：
+    但where标签在使用的时候，必须搭配where对中的if标签使用
+    通过if标签的判断，如果有查询条件，泽出现where关键字，没有查询条件不出现查询语句
+
+    where标签会自动过滤or/and
+-->
+    <select id="select13" parameterType="student" resultType="student">
+        select * from student
+        <where>
+        <if test="name!=null and name !=''">
+            name like '%' #{name} '%'
+        </if>
+        <if test="age!=null and age !=''">
+            or age = #{age}
+        </if>
+
+        </where>
+    </select>
+
+<!--
+        foreach标签，用来遍历数组参数
+        collection：标识传递的参数的类型
+                    array 数组
+                    list  集合
+        item：每一次遍历出来的元素，该元素使用时，必须套用在#{}
+        open:拼接循环的开始符号
+        close：拼接循环的结束符号
+        separator：元素于元素之间的分隔符
+
+        相当于
+        select *
+        from student name in (?,?,?)
+-->
+    <select id="select14" resultType="student">
+        SELECT * FROM student WHERE NAME IN
+        <foreach collection="array" item="name" open="(" close=")" separator=",">
+                #{name}
+        </foreach>
+    </select>
+
+<!--
+    sql标签制作sql片段
+    失去了片段用来代替SQL语句代码
+    如果你的mapper映射文件中的sql语句某些代码出现大量重复可以用失去了来代替他们
+
+    id ：为sql片段的唯一标识
+    sql片段将用于复杂的子查询
+    select * from stu
+    where name=(
+        select xxx
+        xxx(
+            select xxx(
+            )
+        )
+-->
+    <sql id="select">
+        select * from student
+    </sql>
+    <select id="select15" resultType="Student">
+        <include refid="select"/> where name = #{name}
+    </select>
+
+<!--
+    多表联查
+-->
+    <select id="select16" resultType="map">
+        select
+        s.name as sname,
+        c.name as cname
+        from student s join class c on s.classId = c.id
+    </select>
+
+
+    <select id="select17" resultType="studentAndClassVo">
+        select
+        s.id sid,
+        s.name sname,
+        s.email semail,
+        s.age sage,
+        c.id cid,
+        c.name cname
+        from student s join class c on s.classId = c.id
+    </select>
+
+    <select id="select18" resultType="studentAndClassVo">
+        select
+        s.id sid,
+        s.name sname,
+        s.email semail,
+        s.age sage,
+        c.id cid,
+        c.name cname
+        from student s join class c on s.classid = c.id
+        where s.name like '%' #{name} '%'
+    </select>
+
+    <select id="select19" resultType="studentAndClassVo">
+         select
+        s.id sid,
+        s.name sname,
+        s.email semail,
+        s.age sage,
+        c.id cid,
+        c.name cname
+        from student s join class c on s.classid = c.id
+        where s.name like '%' #{sname} '%' and c.name = #{cname}
+    </select>
+
+<!--
+resultMap搭配vo进行查询
+-->
+    <resultMap id="scvo" type="studentAndClassVo">
+        <result property="sname" column="studentname"></result>
+        <result property="cname" column="classname"></result>
+        <result property="semail" column="studentemail"></result>
+        <result property="sage" column="studentage"></result>
+    </resultMap>
+    <select id="select20" parameterType="studentAndClassVo" resultType="studentAndClassVo">
+        select
+        s.id sid,
+        s.name studentname,
+        s.email studentemail,
+        s.age studentage,
+        c.id cid,
+        c.name classname
+        from student s join class c on s.classid = c.id
+        where s.name like '%' #{sname} '%' and s.age = #{sage}
+    </select>
+
+
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

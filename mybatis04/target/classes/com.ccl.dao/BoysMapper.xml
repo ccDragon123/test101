@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper
+                PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+                "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccl.dao.BoysMapper">
+
+<!--        按结果嵌套查询-->
+        <select id="getBoys" resultMap="boyGirl">
+                select b.id bid,b.boyName boyName,g.name gName,g.borndate born,g.phone phone,g.id gid,g.sex sex
+                from mybatis.beauty g,mybatis.boys b
+                where g.boyfriend_id = b.id and b.id=#{id};
+        </select>
+
+        <resultMap id="boyGirl" type="Boys">
+                <result property="id" column="bid"/>
+                <result property="boyName" column="boyName"/>
+<!--                ofType是list泛型中的类型-->
+                <collection property="beauties" ofType="Beauty">
+                        <result property="name" column="gName"/>
+                        <result property="bornDate" column="born"/>
+                        <result property="sex" column="sex"/>
+                        <result property="id" column="gid"/>
+                        <result property="phone" column="phone"/>
+                </collection>
+        </resultMap>
+
+</mapper>
